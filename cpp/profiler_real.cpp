@@ -1,59 +1,50 @@
+//=============================================================================================================================
+
+//빌드 프로그램 파일 경로 (MSBuild.exe)
+#define MSBUILD_PATH R"(C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe)"
+
+//솔루션 경로 (필요시 본인에게 맞게 경로 수정 필요)
+#define SOLUTION_PATH R"(C:\Users\minco\source\repos\Solution98\)"
+
+//=============================================================================================================================
+
 #include <iostream>
 #include <string>
+#include <windows.h>
 #include <fstream>
 #include <sstream>
-#include <windows.h>
 #include <regex>
 #include <map>
 #include <iomanip>
 #include <cstdio>
 
+const std::string msbuild_path = MSBUILD_PATH;
+const std::string solution_path = SOLUTION_PATH;
 
-using namespace std;
-
-//============================================================================================================
-//[경로 Check 필요!] 
-//============================================================================================================
-//빌드 프로그램 파일 경로 (MSBuild.exe)
-const string msbuild_path = R"(C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe)";
-
-//프로젝트 파일 경로 (target.vcxproj)
-const string pjt_path = R"(C:\Users\user\source\repos\profiler\latency\latency.vcxproj)";
-
-//빌드 후 실행해야 할 파일 경로 (target.exe)
-const string exe_path = R"(C:\Users\user\source\repos\profiler\latency\Release\latency.exe)";
-
-//JSON LINT CPP 파일 경로
-const string cpp_path = R"(C:\Users\user\source\repos\profiler\target\json_lint_preprocessing.cpp)";
-
-//Output cpp 파일 경로
-const string out_path = R"(C:\Users\user\source\repos\profiler\latency\generated.cpp)";
-
-//Output log 파일 경로
-const string log_path = R"(C:\Users\user\source\repos\profiler\generator\latency_log.txt)";
-
-//============================================================================================================
+const std::string cpp_path = solution_path + R"(Target\json_lint_preprocessing.cpp)"; // 성능을 측정 할 소스코드 경로
+const std::string out_path = solution_path + R"(Latency\generated.cpp)";  // 성능 측정 코드가 삽입된 생성된 소스코드
+const std::string pjt_path = solution_path + R"(Latency\Latency.vcxproj)"; // 빌드 할 프로젝트 파일 경로
+const std::string exe_path = solution_path + R"(Latency\Release\Latency.exe)"; // 빌드 후 실행해야 할 파일 경로
+const std::string log_path = solution_path + R"(Profiler\latency_log.txt)"; // Latency 측정 결과가 적힌 파일 경로
 
 void build() {
     //Release Mode로 Build
-    const string option = R"(/p:Configuration=Release)";
+    const std::string option = R"(/p:Configuration=Release)";
 
-    string cmd = string{ "\"" } + msbuild_path + string{ "\" " } + pjt_path + string{ " " } + option;
+    std::string cmd = std::string{ "\"" } + msbuild_path + std::string{ "\" " } + pjt_path + std::string{ " " } + option;
     system(cmd.c_str());
 }
 
 void run() {
-    string cmd = string{ "\"" } + exe_path + string{ "\"" };
+    std::string cmd = std::string{ "\"" } + exe_path + std::string{ "\"" };
     system(cmd.c_str());
 }
 
-//=============================================================================================================
-
-string fileStr;
+std::string fileStr;
 
 std::vector<std::string> insertLatencyCode() {
 
-    ifstream in{ cpp_path };
+    std::ifstream in{ cpp_path };
 
     std::ostringstream ss;
     ss << in.rdbuf();
@@ -221,7 +212,7 @@ void chart() {
 
 int main() {
     std::vector<std::string> output = insertLatencyCode();
-    
+
     saveOutputToFile(output);
 
     build();
@@ -233,4 +224,5 @@ int main() {
 
     chart();
 
+    return 0;
 }
